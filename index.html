@@ -11,72 +11,90 @@
     <div class="bg-orb orb-two"></div>
     <main class="container">
       <header class="hero">
-        <span class="hero-kicker">AI HEALTH NAVIGATION</span>
-        <h1>CarePath</h1>
+        <span class="hero-kicker" id="hero-kicker">COMMUNITY HEALTH GUIDE</span>
+        <h1 id="hero-title">CarePath</h1>
         <p>
-          Intelligent symptom triage with transparent risk reasoning and
-          low-cost care routing.
+          <span id="hero-subtitle"
+            >Symptom triage support with guidance and care routing.</span
+          >
         </p>
       </header>
 
-      <section id="waiver-screen" class="card">
-        <h2>Consent & Safety Notice</h2>
-        <p class="card-subtitle">
-          Please review before entering any personal health information.
+      <section id="language-screen" class="card">
+        <h2 id="language-title">Choose Your Language</h2>
+        <p class="card-subtitle" id="language-subtitle">
+          Enter your preferred language before continuing.
         </p>
-        <p>
+        <label>
+          <span id="language-input-label">Language</span>
+          <select id="language-input"></select>
+        </label>
+        <p id="language-error" class="language-error hidden"></p>
+        <button id="language-continue-btn" class="primary-btn">
+          Continue
+        </button>
+      </section>
+
+      <section id="waiver-screen" class="card hidden">
+        <h2 id="consent-title">Consent & Safety Notice</h2>
+        <p class="card-subtitle" id="consent-subtitle">Please review before continuing.</p>
+        <p id="consent-body-1">
           This tool offers informational triage support based on user-reported
           inputs. It does not provide an official medical diagnosis and does not
           replace professional medical care.
         </p>
-        <p>
+        <p id="consent-body-2">
           In a medical emergency, including severe chest pain, trouble
           breathing, stroke symptoms (sudden numbness, confusion, speech
           difficulty), severe bleeding, seizures, or suicidal thoughts, call
           emergency services immediately.
         </p>
         <div class="hotline-row">
-          <span class="hotline-pill">Emergency: 911</span>
-          <span class="hotline-pill">Mental Health: 988</span>
+          <span class="hotline-pill" id="hotline-emergency"
+            >National Emergency Hotline: 911</span
+          >
+          <span class="hotline-pill" id="hotline-suicide"
+            >National Suicide Hotline: 988</span
+          >
         </div>
         <label class="checkbox-row">
           <input type="checkbox" id="consent-checkbox" />
-          <span>
+          <span id="consent-checkbox-text">
             I understand this tool is a first-pass support system and not a
             replacement for a doctor. I consent to provide health and location
             information for triage guidance.
           </span>
         </label>
         <button id="start-btn" class="primary-btn" disabled>
-          Continue to Triage
+          <span id="consent-continue-btn-text">Continue to Triage</span>
         </button>
       </section>
 
       <section id="triage-screen" class="card hidden">
-        <h2>Symptom Intake</h2>
-        <p class="card-subtitle">
-          Complete the form below for urgency scoring and best-care routing.
+        <h2 id="triage-title">Symptoms</h2>
+        <p class="card-subtitle" id="triage-subtitle">
+          Complete the form below for urgency scoring, hidden danger alerts, best care routing, and backup options.
         </p>
-        <p id="dataset-status" class="dataset-status">Loading symptom dataset...</p>
+        <p id="dataset-status" class="dataset-status"></p>
         <form id="triage-form">
           <div class="grid">
             <label>
-              Age
+              <span id="label-age">Age</span>
               <input type="number" id="age" min="0" max="120" required />
             </label>
 
             <label>
-              Sex assigned at birth
+              <span id="label-sex">Sex assigned at birth</span>
               <select id="sex" required>
-                <option value="">Select...</option>
-                <option value="female">Female</option>
-                <option value="male">Male</option>
-                <option value="intersex">Intersex</option>
+                <option value="" id="option-select-sex">Select...</option>
+                <option value="female" id="option-female">Female</option>
+                <option value="male" id="option-male">Male</option>
+                <option value="intersex" id="option-intersex">Intersex</option>
               </select>
             </label>
 
             <label>
-              ZIP code
+              <span id="label-zip">ZIP code</span>
               <input
                 type="text"
                 id="zipCode"
@@ -88,60 +106,60 @@
             </label>
 
             <label>
-              Income bracket
+              <span id="label-income">Income bracket</span>
               <select id="incomeBracket" required>
-                <option value="">Select...</option>
-                <option value="very-low">Very low income</option>
-                <option value="low">Low income</option>
-                <option value="moderate">Moderate income</option>
-                <option value="higher">Higher income</option>
+                <option value="" id="option-select-income">Select...</option>
+                <option value="very-low" id="option-income-very-low">Very low income</option>
+                <option value="low" id="option-income-low">Low income</option>
+                <option value="moderate" id="option-income-moderate">Moderate income</option>
+                <option value="higher" id="option-income-higher">Higher income</option>
               </select>
             </label>
 
             <label>
-              Insurance status
+              <span id="label-insurance">Insurance status</span>
               <select id="insuranceStatus" required>
-                <option value="">Select...</option>
-                <option value="none">Uninsured</option>
-                <option value="medicaid">Medicaid</option>
-                <option value="private">Private insurance</option>
+                <option value="" id="option-select-insurance">Select...</option>
+                <option value="none" id="option-insurance-none">Uninsured</option>
+                <option value="medicaid" id="option-insurance-medicaid">Medicaid</option>
+                <option value="private" id="option-insurance-private">Private insurance</option>
               </select>
             </label>
 
             <label>
-              Transport access
+              <span id="label-transport">Transport access</span>
               <select id="transportAccess" required>
-                <option value="">Select...</option>
-                <option value="yes">Yes</option>
-                <option value="limited">Limited</option>
-                <option value="no">No</option>
+                <option value="" id="option-select-transport">Select...</option>
+                <option value="yes" id="option-transport-yes">Yes</option>
+                <option value="limited" id="option-transport-limited">Limited</option>
+                <option value="no" id="option-transport-no">No</option>
               </select>
             </label>
 
             <label>
-              Symptom duration
+              <span id="label-duration">Symptom duration</span>
               <select id="duration" required>
-                <option value="">Select...</option>
-                <option value="hours">Hours</option>
-                <option value="1-3-days">1-3 days</option>
-                <option value="4-7-days">4-7 days</option>
-                <option value="over-a-week">Over a week</option>
+                <option value="" id="option-select-duration">Select...</option>
+                <option value="hours" id="option-duration-hours">Hours</option>
+                <option value="1-3-days" id="option-duration-1-3">1-3 days</option>
+                <option value="4-7-days" id="option-duration-4-7">4-7 days</option>
+                <option value="over-a-week" id="option-duration-week">Over a week</option>
               </select>
             </label>
 
             <label>
-              Severity (1-10)
+              <span id="label-severity">Severity (1-10)</span>
               <input type="number" id="severity" min="1" max="10" required />
             </label>
           </div>
 
           <fieldset>
-            <legend>Symptoms (select all that apply)</legend>
+            <legend id="legend-symptoms">Symptoms (select all that apply)</legend>
             <div class="symptoms-grid" id="symptoms-options"></div>
           </fieldset>
 
-          <label>
-            Notes (optional)
+          <label class="notes-block">
+            <span id="label-notes">Notes / Additional information (optional)</span>
             <textarea
               id="symptomNotes"
               rows="3"
@@ -149,24 +167,30 @@
             ></textarea>
           </label>
 
-          <button type="submit" class="primary-btn">Analyze & Route Care</button>
+          <button type="submit" class="primary-btn" id="analyze-btn">Analyze & Route Care</button>
         </form>
       </section>
 
       <section id="results-screen" class="card hidden">
-        <h2>Your Triage Result</h2>
-        <p class="card-subtitle">
-          AI-assisted recommendation based on your symptom profile and access
-          constraints.
+        <h2 id="results-title">Your Triage Result</h2>
+        <p class="card-subtitle" id="results-subtitle">
+          Recommendation based on your symptom profile and access constraints.
         </p>
         <div id="result-summary"></div>
+        <div id="condition-insights"></div>
         <div id="danger-flags"></div>
         <div id="top-option"></div>
         <div id="backup-options"></div>
-        <button id="start-over-btn" class="secondary-btn">Start Over</button>
+        <div class="results-actions">
+          <button id="doctor-brief-btn" class="secondary-btn">
+            What to tell your doctor once you arrive
+          </button>
+          <button id="start-over-btn" class="secondary-btn">Start Over</button>
+        </div>
+        <div id="doctor-brief-output" class="hidden"></div>
       </section>
     </main>
 
-    <script src="./app.js"></script>
+    <script src="./main.js"></script>
   </body>
 </html>
