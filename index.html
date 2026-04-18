@@ -38,6 +38,11 @@
       <section id="waiver-screen" class="card hidden">
         <h2 id="consent-title">Consent & Safety Notice</h2>
         <p class="card-subtitle" id="consent-subtitle">Please review before continuing.</p>
+        <p id="consent-mission">
+          CarePath was built for the 25 million uninsured Americans and millions more who do not
+          speak English - people who delay care because they do not know where to go or what they
+          can afford.
+        </p>
         <p id="consent-body-1">
           This tool offers informational triage support based on user-reported
           inputs. It does not provide an official medical diagnosis and does not
@@ -80,7 +85,7 @@
           <div class="grid">
             <label>
               <span id="label-age">Age</span>
-              <input type="number" id="age" min="0" max="120" required />
+              <input type="number" id="age" min="15" max="120" required />
             </label>
 
             <label>
@@ -176,6 +181,7 @@
         <p class="card-subtitle" id="results-subtitle">
           Recommendation based on your symptom profile and access constraints.
         </p>
+        <p id="results-impact"><em>1 in 4 Americans delays care due to cost or confusion about where to go. CarePath helps bridge that gap.</em></p>
         <div id="result-summary"></div>
         <div id="condition-insights"></div>
         <div id="danger-flags"></div>

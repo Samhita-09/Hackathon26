@@ -188,6 +188,10 @@ label {
   font-weight: 600;
 }
 
+#language-continue-btn {
+  margin-top: 8px;
+}
+
 input,
 select,
 textarea {

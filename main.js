@@ -115,7 +115,7 @@ const TRANSLATIONS = {
     heroKicker: "COMMUNITY HEALTH GUIDE",
     heroTitle: "CarePath",
     heroSubtitle: "Symptom triage support with guidance and care routing.",
-    docTitle: "CarePath - Triage + Access",
+    docTitle: "CarePath - Triage",
     languageTitle: "Choose Your Language",
     languageSubtitle: "Enter your preferred language before continuing.",
     languageInputLabel: "Language",
@@ -136,10 +136,11 @@ const TRANSLATIONS = {
     consentCheckbox:
       "I understand this tool is a first-pass support system and not a replacement for a doctor. I consent to provide health and location information for triage guidance.",
     consentContinue: "Continue to Triage",
-    triageTitle: "Symptom Intake",
+    triageTitle: "Symptom",
     triageSubtitle:
       "Complete the form below for urgency scoring, hidden danger alerts, best care routing, and backup options.",
     labelAge: "Age",
+    ageRestrictionMessage: "You must be at least {minAge} years old to use this tool.",
     labelSex: "Sex assigned at birth",
     labelZip: "ZIP code",
     labelIncome: "Income bracket",
@@ -301,6 +302,8 @@ const TRANSLATIONS = {
     triageSubtitle:
       "Bitte Formular ausfüllen für Dringlichkeit, Warnhinweise und beste Versorgungsoptionen.",
     labelAge: "Alter",
+    ageRestrictionMessage:
+      "Sie müssen mindestens {minAge} Jahre alt sein, um dieses Tool zu verwenden.",
     labelSex: "Geschlecht bei Geburt",
     labelZip: "Postleitzahl",
     labelIncome: "Einkommensstufe",
@@ -460,6 +463,7 @@ const TRANSLATIONS = {
     triageTitle: "症状录入",
     triageSubtitle: "填写表单以获取紧急程度评估、风险提示与就医路线建议。",
     labelAge: "年龄",
+    ageRestrictionMessage: "您必须年满 {minAge} 岁才能使用本工具。",
     labelSex: "出生时指定性别",
     labelZip: "邮政编码",
     labelIncome: "收入区间",
@@ -699,6 +703,8 @@ const doctorBriefButton = document.getElementById("doctor-brief-btn");
 const doctorBriefOutput = document.getElementById("doctor-brief-output");
 const startOverButton = document.getElementById("start-over-btn");
 const submitButton = triageForm.querySelector("button[type='submit']");
+const ageInput = document.getElementById("age");
+const MINIMUM_ALLOWED_AGE = 15;
 
 let symptomCatalog = [];
 let diseaseProfiles = [];
@@ -799,6 +805,12 @@ function init() {
     startButton.disabled = !consentCheckbox.checked;
   });
 
+  ageInput.addEventListener("input", () => {
+    if (Number(ageInput.value) >= MINIMUM_ALLOWED_AGE) {
+      ageInput.setCustomValidity("");
+    }
+  });
+
   startButton.addEventListener("click", () => {
     waiverScreen.classList.add("hidden");
     triageScreen.classList.remove("hidden");
@@ -812,6 +824,13 @@ function init() {
 
     try {
       const formData = collectFormData();
+      if (formData.age < MINIMUM_ALLOWED_AGE) {
+        const message = t("ageRestrictionMessage", { minAge: MINIMUM_ALLOWED_AGE });
+        ageInput.setCustomValidity(message);
+        ageInput.reportValidity();
+        return;
+      }
+      ageInput.setCustomValidity("");
       const triage = calculateTriage(formData);
       const clinicLookup = await lookupClinicsByZip(formData.zipCode, triage.recommendedLevel);
       const rankedOptions = rankCareOptions(
@@ -2257,10 +2276,11 @@ function toConversationalSymptom(label) {
   if (currentLanguage !== "en") {
     return value;
   }
-  if (!/^[A-Z]/.test(value)) {
-    return value;
+  const lowered = value.toLowerCase();
+  if (!/^[a-z]/.test(lowered)) {
+    return lowered;
   }
-  return value.charAt(0).toLowerCase() + value.slice(1);
+  return lowered.charAt(0).toLowerCase() + lowered.slice(1);
 }
 
 async function mapWithConcurrency(items, concurrency, worker) {
