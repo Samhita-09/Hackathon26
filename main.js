@@ -169,6 +169,8 @@ const TRANSLATIONS = {
     severityModerate: "moderate",
     severitySevere: "severe",
     severityVerySevere: "very severe",
+    submitErrorMessage:
+      "We could not complete analysis right now. Please review your inputs and try again.",
     findingCare: "Finding care options...",
     select: "Select...",
     female: "Female",
@@ -332,6 +334,8 @@ const TRANSLATIONS = {
     severityModerate: "mittelstark",
     severitySevere: "stark",
     severityVerySevere: "sehr stark",
+    submitErrorMessage:
+      "Die Analyse konnte gerade nicht abgeschlossen werden. Bitte Eingaben prüfen und erneut versuchen.",
     findingCare: "Versorgung wird gesucht...",
     select: "Auswählen...",
     female: "Weiblich",
@@ -491,6 +495,7 @@ const TRANSLATIONS = {
     severityModerate: "中等",
     severitySevere: "较重",
     severityVerySevere: "非常严重",
+    submitErrorMessage: "当前无法完成分析。请检查输入后重试。",
     findingCare: "正在查找就医选项...",
     select: "请选择...",
     female: "女性",
@@ -819,6 +824,7 @@ function init() {
   triageForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     submitButton.disabled = true;
+    submitButton.classList.add("loading");
     const originalButtonText = submitButton.textContent;
     submitButton.textContent = t("findingCare");
 
@@ -839,8 +845,12 @@ function init() {
         clinicLookup.clinics
       );
       await renderResults(triage, rankedOptions, formData, clinicLookup);
+    } catch (error) {
+      console.error("submit flow failed", error);
+      alert(t("submitErrorMessage"));
     } finally {
       submitButton.disabled = false;
+      submitButton.classList.remove("loading");
       submitButton.textContent = originalButtonText;
     }
   });
@@ -1329,10 +1339,22 @@ async function lookupClinicsByZip(zipCode, recommendedLevel) {
     };
   }
 
-  const clinics = await fetchNearbyClinics(location.lat, location.lon, recommendedLevel);
+  const clinics = await withTimeout(
+    fetchNearbyClinics(location.lat, location.lon, recommendedLevel),
+    30000,
+    []
+  );
+  const fallbackClinics = clinics.length
+    ? []
+    : await withTimeout(
+    fetchClinicsByNominatim(zipCode, location.lat, location.lon, recommendedLevel),
+        12000,
+        []
+      );
+  const combinedClinics = clinics.length ? clinics : fallbackClinics;
   const maxDistanceMiles = recommendedLevel === "er" ? 25 : 15;
-  const localClinics = clinics.filter((clinic) => clinic.distanceMiles <= maxDistanceMiles);
-  const rankedClinics = localClinics.length ? localClinics : clinics.slice(0, 6);
+  const localClinics = combinedClinics.filter((clinic) => clinic.distanceMiles <= maxDistanceMiles);
+  const rankedClinics = localClinics.length ? localClinics : combinedClinics.slice(0, 6);
   return {
     clinics: rankedClinics,
     source: rankedClinics.length ? "osm-live" : "none",
@@ -1470,6 +1492,63 @@ out center tags 120;`;
     }
   }
   return [];
+}
+
+async function fetchClinicsByNominatim(zipCode, referenceLat, referenceLon, recommendedLevel) {
+  const queries =
+    recommendedLevel === "er"
+      ? [`hospital near ${zipCode}`, `emergency room near ${zipCode}`, `urgent care near ${zipCode}`]
+      : [`clinic near ${zipCode}`, `urgent care near ${zipCode}`, `hospital near ${zipCode}`];
+  const deduped = new Map();
+
+  for (const query of queries) {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=us&limit=12&q=${encodeURIComponent(
+          query
+        )}`
+      );
+      if (!response.ok) {
+        continue;
+      }
+      const data = await response.json();
+      const places = Array.isArray(data) ? data : [];
+      for (const place of places) {
+        const itemLat = Number(place?.lat);
+        const itemLon = Number(place?.lon);
+        if (!Number.isFinite(itemLat) || !Number.isFinite(itemLon)) {
+          continue;
+        }
+        const name = String(place?.name || "").trim() || String(place?.display_name || "").split(",")[0].trim();
+        if (!name) {
+          continue;
+        }
+        const key = `${name.toLowerCase()}|${itemLat.toFixed(4)}|${itemLon.toFixed(4)}`;
+        if (deduped.has(key)) {
+          continue;
+        }
+        const placeText = `${place?.display_name || ""} ${place?.type || ""}`.toLowerCase();
+        const type = placeText.includes("hospital")
+          ? "Emergency Room"
+          : placeText.includes("urgent")
+          ? "Urgent Care"
+          : "Clinic";
+        const clinic = mapOsmElementToClinic({
+          name,
+          tags: { amenity: type === "Emergency Room" ? "hospital" : "clinic" },
+          lat: itemLat,
+          lon: itemLon,
+          referenceLat,
+          referenceLon
+        });
+        deduped.set(key, clinic);
+      }
+    } catch (_error) {
+      // try next query
+    }
+  }
+
+  return Array.from(deduped.values()).sort((a, b) => a.distanceMiles - b.distanceMiles);
 }
 
 function mapOsmElementToClinic({ name, tags, lat, lon, referenceLat, referenceLon }) {
@@ -2178,6 +2257,22 @@ function buildZipMapUrls(zipCode, location = null) {
     embedUrl: `https://www.google.com/maps?q=${query}&z=12&output=embed`,
     directionsUrl: ""
   };
+}
+
+async function withTimeout(promise, timeoutMs, fallbackValue) {
+  let timerId;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((resolve) => {
+        timerId = setTimeout(() => resolve(fallbackValue), timeoutMs);
+      })
+    ]);
+  } finally {
+    if (timerId) {
+      clearTimeout(timerId);
+    }
+  }
 }
 
 function renderDoctorBrief() {
