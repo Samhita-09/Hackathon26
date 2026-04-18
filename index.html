@@ -7,29 +7,44 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <div class="bg-orb orb-one"></div>
+    <div class="bg-orb orb-two"></div>
     <main class="container">
       <header class="hero">
+        <span class="hero-kicker">AI HEALTH NAVIGATION</span>
         <h1>CarePath</h1>
-        <p>health triage + low-income care routing</p>
+        <p>
+          Intelligent symptom triage with transparent risk reasoning and
+          low-cost care routing.
+        </p>
       </header>
 
       <section id="waiver-screen" class="card">
         <h2>Consent & Safety Notice</h2>
-        <p>
-          This tool provides informational triage support only. It does not
-          provide medical diagnosis and does not replace professional medical
-          care.
+        <p class="card-subtitle">
+          Please review before entering any personal health information.
         </p>
         <p>
-          If you have severe chest pain, trouble breathing, signs of stroke,
-          severe bleeding, seizures, or suicidal thoughts, call emergency
-          services immediately.
+          This tool offers informational triage support based on user-reported
+          inputs. It does not provide an official medical diagnosis and does not
+          replace professional medical care.
         </p>
+        <p>
+          In a medical emergency, including severe chest pain, trouble
+          breathing, stroke symptoms (sudden numbness, confusion, speech
+          difficulty), severe bleeding, seizures, or suicidal thoughts, call
+          emergency services immediately.
+        </p>
+        <div class="hotline-row">
+          <span class="hotline-pill">Emergency: 911</span>
+          <span class="hotline-pill">Mental Health: 988</span>
+        </div>
         <label class="checkbox-row">
           <input type="checkbox" id="consent-checkbox" />
           <span>
-            I understand this tool is informational, and I consent to provide
-            health and location information to receive guidance.
+            I understand this tool is a first-pass support system and not a
+            replacement for a doctor. I consent to provide health and location
+            information for triage guidance.
           </span>
         </label>
         <button id="start-btn" class="primary-btn" disabled>
@@ -39,6 +54,10 @@
 
       <section id="triage-screen" class="card hidden">
         <h2>Symptom Intake</h2>
+        <p class="card-subtitle">
+          Complete the form below for urgency scoring and best-care routing.
+        </p>
+        <p id="dataset-status" class="dataset-status">Loading symptom dataset...</p>
         <form id="triage-form">
           <div class="grid">
             <label>
@@ -136,6 +155,10 @@
 
       <section id="results-screen" class="card hidden">
         <h2>Your Triage Result</h2>
+        <p class="card-subtitle">
+          AI-assisted recommendation based on your symptom profile and access
+          constraints.
+        </p>
         <div id="result-summary"></div>
         <div id="danger-flags"></div>
         <div id="top-option"></div>
